@@ -1,0 +1,71 @@
+pip install flask
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# A simple dictionary to simulate risk assessments for countries
+country_risk_data = {
+    'venezuela': {
+        'political': 'High risk due to political instability and corruption.',
+        'economic': 'Hyperinflation and heavy reliance on oil exports.',
+        'legal_compliance': 'Strict sanctions imposed by the US, EU, and other countries. High risk of non-compliance.',
+    },
+    'usa': {
+        'political': 'Stable political system but subject to periodic upheavals due to elections.',
+        'economic': 'Diverse economy with both high growth sectors and declining industries.',
+        'legal_compliance': 'Strict AML/KYC regulations, especially in the banking sector.',
+    },
+    'germany': {
+        'political': 'Stable democracy with low political risk.',
+        'economic': 'Strong, diversified economy with a high standard of living.',
+        'legal_compliance': 'Strict GDPR and data privacy laws; comprehensive corporate compliance requirements.',
+    }
+}
+
+# Function to assess the risk of a specific country
+def assess_country_risk(country_name):
+    country_name = country_name.lower()
+    if country_name in country_risk_data:
+        return country_risk_data[country_name]
+    else:
+        return {
+            'political': 'Data not available',
+            'economic': 'Data not available',
+            'legal_compliance': 'Data not available'
+        }
+
+# Chatbot endpoint
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_input = request.json.get('message').lower()
+    
+    if 'risk' in user_input and 'assessment' in user_input:
+        for country in country_risk_data:
+            if country in user_input:
+                risk_report = assess_country_risk(country)
+                return jsonify({
+                    'response': f'Country: {country.title()}\nPolitical Risk: {risk_report["political"]}\nEconomic Risk: {risk_report["economic"]}\nLegal Compliance Risk: {risk_report["legal_compliance"]}'
+                })
+
+    return jsonify({'response': "Sorry, I couldn't understand your query. Please ask about country risk assessment or legal compliance."})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+function sendMessage() {
+  let userMessage = document.getElementById("userInput").value;
+  
+  fetch('/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ message: userMessage })
+  })
+  .then(response => response.json())
+  .then(data => {
+    document.getElementById("chatOutput").innerText = data.response;
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+  python chatbot.py
